@@ -261,28 +261,28 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="max-w-4xl mx-auto p-2 xs:p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 xs:gap-4 mb-6 w-full">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">Billing Settings</h1>
-            <p className="text-gray-600">Manage billing fields and calculation rules</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold truncate">Billing Settings</h1>
+            <p className="text-gray-600 text-xs xs:text-sm sm:text-base truncate">Manage billing fields and calculation rules</p>
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button onClick={resetForm}>
+              <Button onClick={resetForm} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Field
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-full xs:max-w-xl sm:max-w-xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{isEditing ? "Edit Billing Field" : "Add New Billing Field"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 xs:gap-4">
                   <div>
                     <Label htmlFor="field_name">Field Name *</Label>
                     <Input

@@ -225,14 +225,14 @@ export default function TableManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-4">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="max-w-6xl mx-auto p-2 xs:p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 xs:gap-4 mb-6 w-full">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">Table Management</h1>
-            <p className="text-gray-600">Manage restaurant tables and their status</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold truncate">Table Management</h1>
+            <p className="text-gray-600 text-xs xs:text-sm sm:text-base truncate">Manage restaurant tables and their status</p>
           </div>
           <Dialog>
             <DialogTrigger asChild>
@@ -241,12 +241,13 @@ export default function TableManagementPage() {
                   resetForm()
                   setFormData((prev) => ({ ...prev, table_number: getNextTableNumber().toString() }))
                 }}
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Table
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-full xs:max-w-xl sm:max-w-xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{isEditing ? "Edit Table" : "Add New Table"}</DialogTitle>
               </DialogHeader>
@@ -282,7 +283,7 @@ export default function TableManagementPage() {
                   </Select>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col xs:flex-row gap-2 xs:gap-4">
                   <Button onClick={handleSave} disabled={saving} className="flex-1">
                     {saving ? (
                       <>
@@ -304,7 +305,7 @@ export default function TableManagementPage() {
           </Dialog>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 xs:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((table) => (
             <Card key={table.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">

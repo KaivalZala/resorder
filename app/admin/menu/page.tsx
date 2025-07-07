@@ -554,14 +554,14 @@ export default function MenuManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-4">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="max-w-6xl mx-auto p-2 xs:p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 xs:gap-4 mb-6 w-full">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">Menu Management</h1>
-            <p className="text-gray-600">Add, edit, and manage menu items</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold truncate">Menu Management</h1>
+            <p className="text-gray-600 text-xs xs:text-sm sm:text-base truncate">Add, edit, and manage menu items</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -570,12 +570,13 @@ export default function MenuManagementPage() {
                   resetForm()
                   setDialogOpen(true)
                 }}
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-full xs:max-w-xl sm:max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{isEditing ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
               </DialogHeader>
@@ -584,7 +585,7 @@ export default function MenuManagementPage() {
           </Dialog>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 xs:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
           {menuItems.map((item) => (
             <Card key={item.id} className={`${!item.in_stock ? "opacity-60" : ""}`}>
               <div className="relative">

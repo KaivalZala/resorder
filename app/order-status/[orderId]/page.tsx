@@ -380,14 +380,14 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
 
                   {order.status === "pending" && (
                     <>
-                      <Button
+                      {/* <Button
                         variant="outline"
                         onClick={() => router.push("/menu")}
                         className="w-full border-2 border-orange-200 hover:bg-orange-50"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add More Items
-                      </Button>
+                      </Button> */}
                       <Button variant="destructive" onClick={cancelOrder} className="w-full">
                         <XCircle className="h-4 w-4 mr-2" />
                         Cancel Order

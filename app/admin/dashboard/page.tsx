@@ -421,22 +421,22 @@ export default function AdminDashboardPage() {
   const OrderCard = ({ order }: { order: Order }) => (
     <Card className="mb-4">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <CardTitle className="text-lg">Table #{order.table_number}</CardTitle>
-            <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleString()}</p>
-            <p className="text-sm text-gray-600">Order ID: {order.id.slice(0, 8)}</p>
+            <CardTitle className="text-base sm:text-lg">Table #{order.table_number}</CardTitle>
+            <p className="text-xs sm:text-sm text-gray-600">{new Date(order.created_at).toLocaleString()}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Order ID: {order.id.slice(0, 8)}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right mt-2 sm:mt-0">
             <Badge className={getStatusColor(order.status)}>{order.status.replace("_", " ").toUpperCase()}</Badge>
-            <p className="text-lg font-bold mt-1">₹{order.total_amount.toFixed(2)}</p>
+            <p className="text-base sm:text-lg font-bold mt-1">₹{order.total_amount.toFixed(2)}</p>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2 mb-4">
           {order.items.map((item, index) => (
-            <div key={index} className="flex justify-between text-sm">
+            <div key={index} className="flex justify-between text-xs sm:text-sm">
               <span>
                 {item.quantity}x {item.name}
               </span>
@@ -447,21 +447,19 @@ export default function AdminDashboardPage() {
 
         {order.special_notes && (
           <div className="mb-4 p-2 bg-yellow-50 rounded">
-            <p className="text-sm font-medium text-yellow-800">Special Notes:</p>
-            <p className="text-sm text-yellow-700">{order.special_notes}</p>
+            <p className="text-xs sm:text-sm font-medium text-yellow-800">Special Notes:</p>
+            <p className="text-xs sm:text-sm text-yellow-700">{order.special_notes}</p>
           </div>
         )}
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
           {order.status === "pending" && (
             <>
-              <Button size="sm" onClick={() => updateOrderStatus(order.id, "in_progress")}> 
-                <CheckCircle className="h-4 w-4 mr-1" />
-                Confirm
+              <Button size="sm" onClick={() => updateOrderStatus(order.id, "in_progress")} className="w-full sm:w-auto">
+                <CheckCircle className="h-4 w-4 mr-1" />Confirm
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => updateOrderStatus(order.id, "cancelled")}> 
-                <XCircle className="h-4 w-4 mr-1" />
-                Cancel Order
+              <Button size="sm" variant="destructive" onClick={() => updateOrderStatus(order.id, "cancelled")} className="w-full sm:w-auto">
+                <XCircle className="h-4 w-4 mr-1" />Cancel Order
               </Button>
             </>
           )}
@@ -470,18 +468,16 @@ export default function AdminDashboardPage() {
             <Button
               size="sm"
               onClick={() => completeOrderWithMerge(order.id)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
             >
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Complete
+              <CheckCircle className="h-4 w-4 mr-1" />Complete
             </Button>
           )}
 
-          <Button variant="outline" size="sm" onClick={() => printOrder(order)}>
-            <Printer className="h-4 w-4 mr-1" />
-            Print
+          <Button variant="outline" size="sm" onClick={() => printOrder(order)} className="w-full sm:w-auto">
+            <Printer className="h-4 w-4 mr-1" />Print
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setPreviewOrder(order)}>
+          <Button variant="outline" size="sm" onClick={() => setPreviewOrder(order)} className="w-full sm:w-auto">
             Preview Bill
           </Button>
         </div>
@@ -647,34 +643,25 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-4">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-6xl mx-auto p-2 sm:p-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage orders and restaurant operations</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-gray-600 text-sm sm:text-base">Manage orders and restaurant operations</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push("/admin/analytics")}>
-              Analytics
-            </Button>
-            <Button variant="outline" onClick={() => router.push("/admin/tables")}>
-              Table Management
-            </Button>
-            <Button variant="outline" onClick={() => router.push("/admin/menu")}>
-              Menu Management
-            </Button>
-            <Button variant="outline" onClick={() => router.push("/admin/settings")}>
-              Settings
-            </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => router.push('/admin/analytics')} className="w-full sm:w-auto">Analytics</Button>
+            <Button variant="outline" onClick={() => router.push('/admin/tables')} className="w-full sm:w-auto">Table Management</Button>
+            <Button variant="outline" onClick={() => router.push('/admin/menu')} className="w-full sm:w-auto">Menu Management</Button>
+            <Button variant="outline" onClick={() => router.push('/admin/settings')} className="w-full sm:w-auto">Settings</Button>
+            <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
+              <LogOut className="h-4 w-4 mr-2" />Logout
             </Button>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="pending" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="pending" className="relative">
               Pending
               {filterOrdersByStatus("pending").length > 0 && (
@@ -777,7 +764,7 @@ export default function AdminDashboardPage() {
                     size="sm"
                     onClick={clearCancelledOrders}
                     disabled={clearingCancelled}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="bg-red-600 hover:bg-red-700 mt-6"
                   >
                     {clearingCancelled ? (
                       <>

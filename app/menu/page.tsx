@@ -27,6 +27,7 @@ export default function MenuPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [activeOrders, setActiveOrders] = useState<Order[]>([])
   const [ordersDialogOpen, setOrdersDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const { state, dispatch, getCartCount, getCartTotal } = useCart()
   const router = useRouter()
   const supabase = createClient()
@@ -95,7 +96,19 @@ export default function MenuPage() {
 
   const categories = ["All", ...Array.from(new Set(menuItems.map((item) => item.category)))]
   const filteredItems =
-    selectedCategory === "All" ? menuItems : menuItems.filter((item) => item.category === selectedCategory)
+    selectedCategory === "All"
+      ? menuItems
+      : menuItems.filter((item) => item.category === selectedCategory)
+  const searchedItems = searchQuery.trim() === ""
+    ? filteredItems
+    : filteredItems.filter((item) => {
+        const q = searchQuery.toLowerCase()
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.description?.toLowerCase().includes(q) ||
+          (item.tags && item.tags.some((tag) => tag.toLowerCase().includes(q)))
+        )
+      })
 
   const handleAddToCart = () => {
     if (!selectedItem) return
@@ -205,17 +218,25 @@ export default function MenuPage() {
           🧄
         </div>
 
-        {/* Back button */}
+        {/* Back button
         <div className="absolute top-6 left-6">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/table-selection")}
+            onClick={() => {
+              router.back()
+              // Fallback if there's no history
+              setTimeout(() => {
+                if (document.location.pathname === '/menu') {
+                  router.push('/table-selection')
+                }
+              }, 100)
+            }}
             className="text-white hover:bg-white/20 backdrop-blur-sm rounded-full"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-        </div>
+        </div> */}
 
         <div className="relative h-full flex items-center justify-center text-white text-center px-4">
           <div className="animate-slide-up">
@@ -256,13 +277,22 @@ export default function MenuPage() {
               </Button>
             ))}
           </div>
+          <div className="mt-4 flex justify-center">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search menu items..."
+              className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all"
+            />
+          </div>
         </div>
       </div>
 
       {/* Enhanced Menu Items */}
       <div className="max-w-6xl mx-auto p-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredItems.map((item, index) => (
+          {searchedItems.map((item, index) => (
             <Card
               key={item.id}
               className="overflow-hidden hover-lift bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-slide-up"
