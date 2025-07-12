@@ -192,3 +192,44 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #ff6b35, #ff4500);
 }
+
+
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 1s ease-out forwards;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.animate-typing {
+  display: inline-block;
+  animation: typing 4s steps(40, end) 1;
+}
+
+
+/* Hide horizontal scrollbar for category filter on mobile */
+.hide-horizontal-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.hide-horizontal-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+

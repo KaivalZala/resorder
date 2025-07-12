@@ -26,6 +26,276 @@ import {
   checkBucketExists,
 } from "@/lib/storage-utils-fallback"
 
+// Define FormContent outside the main component to prevent re-creation on every render
+const FormContent = ({
+  formData,
+  setFormData,
+  imageFile,
+  setImageFile,
+  imagePreview,
+  setImagePreview,
+  imageUrl,
+  setImageUrl,
+  uploadingImage,
+  uploadError,
+  bucketExists,
+  saving,
+  isEditing,
+  selectedItem,
+  useExternalUrl,
+  setUseExternalUrl,
+  handleImageChange,
+  handleImageUrlChange,
+  handleSave,
+  resetForm,
+  setDialogOpen,
+  handleTagToggle,
+  clearImage,
+  categories,
+  availableTags,
+}: {
+  formData: {
+    name: string
+    description: string
+    price: string
+    category: string
+    tags: string[]
+    in_stock: boolean
+  }
+  setFormData: React.Dispatch<React.SetStateAction<{
+    name: string
+    description: string
+    price: string
+    category: string
+    tags: string[]
+    in_stock: boolean
+  }>>
+  imageFile: File | null
+  setImageFile: React.Dispatch<React.SetStateAction<File | null>>
+  imagePreview: string | null
+  setImagePreview: React.Dispatch<React.SetStateAction<string | null>>
+  imageUrl: string
+  setImageUrl: React.Dispatch<React.SetStateAction<string>>
+  uploadingImage: boolean
+  uploadError: string | null
+  bucketExists: boolean | null
+  saving: boolean
+  isEditing: boolean
+  selectedItem: MenuItem | null
+  useExternalUrl: boolean
+  setUseExternalUrl: React.Dispatch<React.SetStateAction<boolean>>
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleImageUrlChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleSave: () => void
+  resetForm: () => void
+  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  handleTagToggle: (tag: string) => void
+  clearImage: () => void
+  categories: string[]
+  availableTags: string[]
+}) => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="name">Name *</Label>
+        <Input
+          id="name"
+          value={formData.name || ""}
+          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+          placeholder="Item name"
+        />
+      </div>
+      <div>
+        <Label htmlFor="price">Price *</Label>
+        <Input
+          id="price"
+          type="number"
+          step="0.01"
+          value={formData.price || ""}
+          onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+          placeholder="0.00"
+        />
+      </div>
+    </div>
+
+    <div>
+      <Label htmlFor="description">Description</Label>
+      <Textarea
+        id="description"
+        value={formData.description || ""}
+        onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+        placeholder="Item description"
+      />
+    </div>
+
+    <div>
+      <Label htmlFor="category">Category *</Label>
+      <Select
+        value={formData.category || ""}
+        onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select category" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div>
+      <Label>Tags</Label>
+      <div className="flex flex-wrap gap-2 mt-2">
+        {availableTags.map((tag) => (
+          <Badge
+            key={tag}
+            variant={formData.tags.includes(tag) ? "default" : "outline"}
+            className="cursor-pointer"
+            onClick={() => handleTagToggle(tag)}
+          >
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <Label>Image</Label>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => setUseExternalUrl(!useExternalUrl)}>
+            {useExternalUrl ? "Upload File" : "Use URL"}
+          </Button>
+
+        </div>
+      </div>
+
+      
+
+      <div className="space-y-3">
+        {useExternalUrl ? (
+          <div>
+            <Input
+              placeholder="https://example.com/image.jpg"
+              value={imageUrl || ""}
+              onChange={handleImageUrlChange}
+              disabled={uploadingImage}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Paste image URL from imgur.com, unsplash.com, or any public image host
+            </p>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={uploadingImage || !bucketExists}
+              className="flex-1"
+            />
+            {imageFile && (
+              <Button type="button" variant="outline" size="icon" onClick={clearImage} disabled={uploadingImage}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
+
+        {uploadingImage && (
+          <Alert>
+            <LoadingSpinner size="sm" className="h-4 w-4" />
+            <AlertDescription>Uploading image... Please wait.</AlertDescription>
+          </Alert>
+        )}
+
+        {uploadError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="whitespace-pre-line">{uploadError}</AlertDescription>
+          </Alert>
+        )}
+
+        {imagePreview && (
+          <div className="mt-3">
+            <Label className="text-sm text-gray-600">Preview:</Label>
+            <div className="relative mt-1">
+              <Image
+                src={imagePreview || "/placeholder.svg"}
+                alt="Preview"
+                width={200}
+                height={150}
+                className="rounded-lg object-cover border"
+              />
+              {(imageFile || (useExternalUrl && imageUrl)) && (
+                <div className="absolute top-2 right-2">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    New
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="text-xs text-gray-500">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {useExternalUrl
+              ? "Use any public image URL (imgur.com recommended)"
+              : "Supported: JPG, PNG, GIF, WebP • Max size: 5MB"}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex items-center space-x-2">
+      <Switch
+        id="in_stock"
+        checked={formData.in_stock}
+        onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, in_stock: checked }))}
+      />
+      <Label htmlFor="in_stock">In Stock</Label>
+    </div>
+
+    <div className="flex gap-2">
+      <Button onClick={handleSave} disabled={saving || uploadingImage} className="flex-1">
+        {saving ? (
+          <>
+            <LoadingSpinner size="sm" className="mr-2" />
+            Saving...
+          </>
+        ) : uploadingImage ? (
+          <>
+            <LoadingSpinner size="sm" className="mr-2" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="h-4 w-4 mr-2" />
+            {isEditing ? "Update Item" : "Add Item"}
+          </>
+        )}
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => {
+          resetForm()
+          setDialogOpen(false)
+        }}
+        disabled={saving || uploadingImage}
+      >
+        Cancel
+      </Button>
+    </div>
+  </div>
+)
+
 export default function MenuManagementPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,7 +322,7 @@ export default function MenuManagementPage() {
   const supabase = createClient()
   const { toast } = useToast()
 
-  const categories = ["Starters", "Mains", "Beverages", "Desserts"]
+  const categories = ["Tandoori Starters Vegetaria", "Tandoori Starters Non-Vegetaria", "Main Course(Indian) Vegetarian"]
   const availableTags = ["veg", "non-veg", "spicy", "healthy", "gluten-free"]
 
   useEffect(() => {
@@ -119,14 +389,14 @@ export default function MenuManagementPage() {
   const handleEdit = (item: MenuItem) => {
     setSelectedItem(item)
     setFormData({
-      name: item.name,
+      name: item.name || "",
       description: item.description || "",
-      price: item.price.toString(),
-      category: item.category,
-      tags: item.tags,
-      in_stock: item.in_stock,
+      price: item.price?.toString() || "",
+      category: item.category || "",
+      tags: item.tags || [],
+      in_stock: item.in_stock ?? true,
     })
-    setImagePreview(item.image_url)
+    setImagePreview(item.image_url || null)
     setImageUrl(item.image_url || "")
     setImageFile(null)
     setUploadError(null)
@@ -325,233 +595,6 @@ export default function MenuManagementPage() {
     )
   }
 
-  const FormContent = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Name *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            placeholder="Item name"
-          />
-        </div>
-        <div>
-          <Label htmlFor="price">Price *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-            placeholder="0.00"
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-          placeholder="Item description"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="category">Category *</Label>
-        <Select
-          value={formData.category}
-          onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label>Tags</Label>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {availableTags.map((tag) => (
-            <Badge
-              key={tag}
-              variant={formData.tags.includes(tag) ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => handleTagToggle(tag)}
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label>Image</Label>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setUseExternalUrl(!useExternalUrl)}>
-              {useExternalUrl ? "Upload File" : "Use URL"}
-            </Button>
-            {!bucketExists && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  window.open(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/project/default/storage/buckets`, "_blank")
-                }
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Create Bucket
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {!bucketExists && (
-          <Alert className="mb-3">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Storage bucket not found. You can either:
-              <br />
-              1. <strong>Create bucket manually:</strong> Go to Supabase Dashboard → Storage → New Bucket → Name:
-              "menu-images" → Make it PUBLIC
-              <br />
-              2. <strong>Use external URLs:</strong> Upload images to imgur.com and paste the URL
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="space-y-3">
-          {useExternalUrl ? (
-            <div>
-              <Input
-                placeholder="https://example.com/image.jpg"
-                value={imageUrl}
-                onChange={handleImageUrlChange}
-                disabled={uploadingImage}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Paste image URL from imgur.com, unsplash.com, or any public image host
-              </p>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={uploadingImage || !bucketExists}
-                className="flex-1"
-              />
-              {imageFile && (
-                <Button type="button" variant="outline" size="icon" onClick={clearImage} disabled={uploadingImage}>
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          )}
-
-          {uploadingImage && (
-            <Alert>
-              <LoadingSpinner size="sm" className="h-4 w-4" />
-              <AlertDescription>Uploading image... Please wait.</AlertDescription>
-            </Alert>
-          )}
-
-          {uploadError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="whitespace-pre-line">{uploadError}</AlertDescription>
-            </Alert>
-          )}
-
-          {imagePreview && (
-            <div className="mt-3">
-              <Label className="text-sm text-gray-600">Preview:</Label>
-              <div className="relative mt-1">
-                <Image
-                  src={imagePreview || "/placeholder.svg"}
-                  alt="Preview"
-                  width={200}
-                  height={150}
-                  className="rounded-lg object-cover border"
-                />
-                {(imageFile || (useExternalUrl && imageUrl)) && (
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      New
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {useExternalUrl
-                ? "Use any public image URL (imgur.com recommended)"
-                : "Supported: JPG, PNG, GIF, WebP • Max size: 5MB"}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="in_stock"
-          checked={formData.in_stock}
-          onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, in_stock: checked }))}
-        />
-        <Label htmlFor="in_stock">In Stock</Label>
-      </div>
-
-      <div className="flex gap-2">
-        <Button onClick={handleSave} disabled={saving || uploadingImage} className="flex-1">
-          {saving ? (
-            <>
-              <LoadingSpinner size="sm" className="mr-2" />
-              Saving...
-            </>
-          ) : uploadingImage ? (
-            <>
-              <LoadingSpinner size="sm" className="mr-2" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4 mr-2" />
-              {isEditing ? "Update Item" : "Add Item"}
-            </>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            resetForm()
-            setDialogOpen(false)
-          }}
-          disabled={saving || uploadingImage}
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
-  )
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto p-2 xs:p-4 sm:p-6 md:p-8">
@@ -580,7 +623,33 @@ export default function MenuManagementPage() {
               <DialogHeader>
                 <DialogTitle>{isEditing ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
               </DialogHeader>
-              <FormContent />
+              <FormContent 
+                formData={formData}
+                setFormData={setFormData}
+                imageFile={imageFile}
+                setImageFile={setImageFile}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                imageUrl={imageUrl}
+                setImageUrl={setImageUrl}
+                uploadingImage={uploadingImage}
+                uploadError={uploadError}
+                bucketExists={bucketExists}
+                saving={saving}
+                isEditing={isEditing}
+                selectedItem={selectedItem}
+                useExternalUrl={useExternalUrl}
+                setUseExternalUrl={setUseExternalUrl}
+                handleImageChange={handleImageChange}
+                handleImageUrlChange={handleImageUrlChange}
+                handleSave={handleSave}
+                resetForm={resetForm}
+                setDialogOpen={setDialogOpen}
+                handleTagToggle={handleTagToggle}
+                clearImage={clearImage}
+                categories={categories}
+                availableTags={availableTags}
+              />
             </DialogContent>
           </Dialog>
         </div>
