@@ -222,167 +222,317 @@ export default function AdminDashboardPage() {
       originalOrderTotal: order.total_amount.toFixed(2),
     })
 
-    const printContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Order Receipt - ${order.id.slice(0, 8)}</title>
-      <style>
-        @media print {
-          html, body {
-            width: 80mm;
-            min-width: 80mm;
-            max-width: 80mm;
-            margin: 0;
-            padding: 0;
-            font-size: 14px;
-            background: #fff;
-          }
-          .header h1 {
-            font-size: 20px;
-          }
-          .total {
-            font-size: 20px;
-          }
-        }
-        body { 
-          font-family: Arial, sans-serif; 
-          max-width: 400px; 
-          margin: 0 auto; 
-          padding: 20px;
-          line-height: 1.4;
-          font-size: 14px;
-        }
-        .header { 
-          text-align: center; 
-          border-bottom: 2px solid #000; 
-          padding-bottom: 10px; 
-          margin-bottom: 20px;
-        }
-        .order-info { 
-          margin-bottom: 20px; 
-        }
-        .items { 
-          border-bottom: 1px solid #ccc; 
-          padding-bottom: 10px; 
-          margin-bottom: 10px;
-        }
-        .item { 
-          display: flex; 
-          justify-content: space-between; 
-          margin-bottom: 5px;
-        }
-        .billing-section {
-          margin: 15px 0;
-          padding: 10px 0;
-          border-top: 1px dashed #ccc;
-        }
-        .billing-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 5px;
-          font-size: 14px;
-        }
-        .subtotal-row {
-          font-weight: bold;
-          border-top: 1px solid #ccc;
-          padding-top: 5px;
-          margin-top: 10px;
-        }
-        .total { 
-          font-weight: bold; 
-          font-size: 18px; 
-          text-align: right;
-          margin-top: 10px;
-          padding-top: 10px;
-          border-top: 2px solid #000;
-        }
-        .notes {
-          background: #f5f5f5;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 4px;
-        }
-        .discount {
-          color: #16a34a;
-        }
-        .charge {
-          color: #dc2626;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Bella Vista Restaurant</h1>
-        <p>Order Receipt</p>
-      </div>
+  //   const printContent = `
+  //   <!DOCTYPE html>
+  //   <html>
+  //   <head>
+  //     <title>Order Receipt - ${order.id.slice(0, 8)}</title>
+  //     <style>
+  //       @media print {
+  //         html, body {
+  //           width: 80mm;
+  //           min-width: 80mm;
+  //           max-width: 80mm;
+  //           margin: 0;
+  //           padding: 0;
+  //           font-size: 14px;
+  //           background: #fff;
+  //         }
+  //         .header h1 {
+  //           font-size: 20px;
+  //         }
+  //         .total {
+  //           font-size: 20px;
+  //         }
+  //       }
+  //       body { 
+  //         font-family: Arial, sans-serif; 
+  //         max-width: 400px; 
+  //         margin: 0 auto; 
+  //         padding: 20px;
+  //         line-height: 1.4;
+  //         font-size: 14px;
+  //       }
+  //       .header { 
+  //         text-align: center; 
+  //         border-bottom: 2px solid #000; 
+  //         padding-bottom: 10px; 
+  //         margin-bottom: 20px;
+  //       }
+  //       .order-info { 
+  //         margin-bottom: 20px; 
+  //       }
+  //       .items { 
+  //         border-bottom: 1px solid #ccc; 
+  //         padding-bottom: 10px; 
+  //         margin-bottom: 10px;
+  //       }
+  //       .item { 
+  //         display: flex; 
+  //         justify-content: space-between; 
+  //         margin-bottom: 5px;
+  //       }
+  //       .billing-section {
+  //         margin: 15px 0;
+  //         padding: 10px 0;
+  //         border-top: 1px dashed #ccc;
+  //       }
+  //       .billing-row {
+  //         display: flex;
+  //         justify-content: space-between;
+  //         margin-bottom: 5px;
+  //         font-size: 14px;
+  //       }
+  //       .subtotal-row {
+  //         font-weight: bold;
+  //         border-top: 1px solid #ccc;
+  //         padding-top: 5px;
+  //         margin-top: 10px;
+  //       }
+  //       .total { 
+  //         font-weight: bold; 
+  //         font-size: 18px; 
+  //         text-align: right;
+  //         margin-top: 10px;
+  //         padding-top: 10px;
+  //         border-top: 2px solid #000;
+  //       }
+  //       .notes {
+  //         background: #f5f5f5;
+  //         padding: 10px;
+  //         margin: 10px 0;
+  //         border-radius: 4px;
+  //       }
+  //       .discount {
+  //         color: #16a34a;
+  //       }
+  //       .charge {
+  //         color: #dc2626;
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     <div class="header">
+  //       <h1>Bella Vista Restaurant</h1>
+  //       <p>Order Receipt</p>
+  //     </div>
       
-      <div class="order-info">
-        <p><strong>Order ID:</strong> ${order.id.slice(0, 8)}</p>
-        <p><strong>Table:</strong> #${order.table_number}</p>
-        <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-        <p><strong>Status:</strong> ${order.status.replace("_", " ").toUpperCase()}</p>
-      </div>
+  //     <div class="order-info">
+  //       <p><strong>Order ID:</strong> ${order.id.slice(0, 8)}</p>
+  //       <p><strong>Table:</strong> #${order.table_number}</p>
+  //       <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+  //       <p><strong>Status:</strong> ${order.status.replace("_", " ").toUpperCase()}</p>
+  //     </div>
 
-      <div class="items">
-        <h3>Order Items:</h3>
-        ${order.items
-          .map(
-            (item) => `
-          <div class="item">
-            <span>${item.quantity}x ${item.name}</span>
-            <span>₹${(item.price * item.quantity).toFixed(2)}</span>
-          </div>
-          ${item.note ? `<div style="font-size: 12px; color: #666; margin-left: 20px;">Note: ${item.note}</div>` : ""}
-        `,
-          )
-          .join("")}
-      </div>
+  //     <div class="items">
+  //       <h3>Order Items:</h3>
+  //       ${order.items
+  //         .map(
+  //           (item) => `
+  //         <div class="item">
+  //           <span>${item.quantity}x ${item.name}</span>
+  //           <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+  //         </div>
+  //         ${item.note ? `<div style="font-size: 12px; color: #666; margin-left: 20px;">Note: ${item.note}</div>` : ""}
+  //       `,
+  //         )
+  //         .join("")}
+  //     </div>
 
-      ${
-        order.special_notes
-          ? `
-        <div class="notes">
-          <strong>Special Instructions:</strong><br>
-          ${order.special_notes}
+  //     ${
+  //       order.special_notes
+  //         ? `
+  //       <div class="notes">
+  //         <strong>Special Instructions:</strong><br>
+  //         ${order.special_notes}
+  //       </div>
+  //     `
+  //         : ""
+  //     }
+
+  //     <div class="billing-section">
+  //       <div class="billing-row subtotal-row">
+  //         <span>Subtotal:</span>
+  //         <span>₹${subtotal.toFixed(2)}</span>
+  //       </div>
+        
+  //       ${calculations
+  //         .map(
+  //           (calc) => `
+  //         <div class="billing-row ${calc.amount < 0 ? "discount" : "charge"}">
+  //           <span>${calc.label}:</span>
+  //           <span>${calc.amount < 0 ? "-" : ""}₹${Math.abs(calc.amount).toFixed(2)}</span>
+  //         </div>
+  //       `,
+  //         )
+  //         .join("")}
+  //     </div>
+
+  //     <div class="total">
+  //       <div style="display: flex; justify-content: space-between; align-items: center;">
+  //         <span>TOTAL:</span>
+  //         <span>₹${finalTotal.toFixed(2)}</span>
+  //       </div>
+  //     </div>
+
+  //     <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
+  //       <p>Thank you for dining with us!</p>
+  //       <p>Printed on ${new Date().toLocaleString()}</p>
+  //       ${billingSettings.length > 0 ? "<p>All charges calculated as per restaurant policy</p>" : ""}
+  //     </div>
+  //   </body>
+  //   </html>
+  // `
+
+  const printContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Receipt - ${order.id.slice(0, 8)}</title>
+<style>
+  @page {
+    size: 80mm auto; /* Fixed width, dynamic height */
+    margin: 0;
+  }
+
+  @media print {
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 80mm;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .receipt {
+      page-break-inside: avoid;
+      width: 80mm;
+      box-sizing: border-box;
+    }
+
+    .receipt * {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    body {
+      background: #fff !important;
+    }
+  }
+
+  body {
+    background: #fff;
+    padding: 20px;
+  }
+
+  .receipt {
+    margin: 0 auto;
+    padding: 10px;
+    border: 1px solid #000;
+    width: 80mm;
+    box-sizing: border-box;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .order-info {
+    margin-bottom: 10px;
+  }
+
+  .items {
+    border-top: 1px dashed #333;
+    border-bottom: 1px dashed #333;
+    padding: 10px 0;
+    margin-bottom: 10px;
+  }
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .totals {
+    margin-top: 10px;
+  }
+
+  .totals .line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .total {
+    font-weight: bold;
+    font-size: 16px;
+    border-top: 1px solid #000;
+    padding-top: 5px;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    margin-top: 20px;
+  }
+</style>
+
+
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h2>Bella Vista</h2>
+      <p>Order Receipt</p>
+    </div>
+
+    <div class="order-info">
+      <p><strong>Table:</strong> #${order.table_number}</p>
+      <p><strong>Order ID:</strong> ${order.id.slice(0, 8)}</p>
+      <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+    </div>
+
+    <div class="items">
+      ${order.items
+        .map(
+          (item) => `
+        <div class="item">
+          <span>${item.quantity}x ${item.name}</span>
+          <span>₹${(item.price * item.quantity).toFixed(2)}</span>
         </div>
       `
-          : ""
-      }
+        )
+        .join("")}
+    </div>
 
-      <div class="billing-section">
-        <div class="billing-row subtotal-row">
-          <span>Subtotal:</span>
-          <span>₹${subtotal.toFixed(2)}</span>
+    <div class="totals">
+      <div class="line"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
+      ${calculations
+        .map(
+          (calc) => `
+        <div class="line">
+          <span>${calc.label}</span>
+          <span>${calc.amount < 0 ? "-" : ""}₹${Math.abs(calc.amount).toFixed(2)}</span>
         </div>
-        
-        ${calculations
-          .map(
-            (calc) => `
-          <div class="billing-row ${calc.amount < 0 ? "discount" : "charge"}">
-            <span>${calc.label}:</span>
-            <span>${calc.amount < 0 ? "-" : ""}₹${Math.abs(calc.amount).toFixed(2)}</span>
-          </div>
-        `,
-          )
-          .join("")}
-      </div>
+      `
+        )
+        .join("")}
+      <div class="line total"><span>Total</span><span>₹${finalTotal.toFixed(2)}</span></div>
+    </div>
 
-      <div class="total">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>TOTAL:</span>
-          <span>₹${finalTotal.toFixed(2)}</span>
-        </div>
-      </div>
+    <div class="footer">
+      <p>Thank you! Visit again.</p>
+      <p>Printed on ${new Date().toLocaleString()}</p>
+    </div>
+  </div>
+</body>
+</html>
+`
 
-      <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
-        <p>Thank you for dining with us!</p>
-        <p>Printed on ${new Date().toLocaleString()}</p>
-        ${billingSettings.length > 0 ? "<p>All charges calculated as per restaurant policy</p>" : ""}
-      </div>
-    </body>
-    </html>
-  `
 
     printWindow.document.write(printContent)
     printWindow.document.close()
@@ -461,6 +611,9 @@ export default function AdminDashboardPage() {
               <Button size="sm" variant="destructive" onClick={() => updateOrderStatus(order.id, "cancelled")} className="w-full sm:w-auto">
                 <XCircle className="h-4 w-4 mr-1" />Cancel Order
               </Button>
+              <Button size="sm" variant="outline" onClick={() => printOrderSlip(order)} className="w-full sm:w-auto">
+                <Printer className="h-4 w-4 mr-1" />Print Slip
+              </Button>
             </>
           )}
 
@@ -474,18 +627,77 @@ export default function AdminDashboardPage() {
             </Button>
           )}
 
-          <Button variant="outline" size="sm" onClick={() => printOrder(order)} className="w-full sm:w-auto">
-            <Printer className="h-4 w-4 mr-1" />Print
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setPreviewOrder(order)} className="w-full sm:w-auto">
-            Preview Bill
-          </Button>
+          {order.status === "completed" && (
+            <Button variant="outline" size="sm" onClick={() => printOrder(order)} className="w-full sm:w-auto">
+              <Printer className="h-4 w-4 mr-1" />Print
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
   )
 
-  // Add these new functions after the existing functions
+  // Add this function after printOrder
+  const printOrderSlip = async (order: Order) => {
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) {
+      toast({
+        title: "Print blocked",
+        description: "Please allow popups to print slips.",
+        variant: "destructive",
+      })
+      return
+    }
+    // Kitchen slip content: table, items, descriptions
+    const slipContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Kitchen Slip - ${order.id.slice(0, 8)}</title>
+        <style>
+          @media print {
+            html, body { width: 80mm; min-width: 80mm; max-width: 80mm; margin: 0; padding: 0; font-size: 15px; background: #fff; }
+          }
+          body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; line-height: 1.5; font-size: 15px; }
+          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+          .order-info { margin-bottom: 15px; }
+          .items { margin-bottom: 10px; }
+          .item { margin-bottom: 8px; }
+          .desc { color: #666; font-size: 13px; margin-left: 18px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>Kitchen Slip</h2>
+        </div>
+        <div class="order-info">
+          <strong>Table:</strong> #${order.table_number}<br/>
+          <strong>Order ID:</strong> ${order.id.slice(0, 8)}<br/>
+          <strong>Time:</strong> ${new Date(order.created_at).toLocaleTimeString()}
+        </div>
+        <div class="items">
+          <strong>Items:</strong><br/>
+          ${order.items.map(item => `
+            <div class="item">
+              ${item.quantity}x ${item.name}
+              ${item.note ? `<div class="desc">Note: ${item.note}</div>` : ""}
+            </div>
+          `).join("")}
+        </div>
+        ${order.special_notes ? `<div class="desc"><strong>Special:</strong> ${order.special_notes}</div>` : ""}
+        <div style="text-align:center; margin-top:20px; font-size:12px; color:#888;">Printed for kitchen use</div>
+      </body>
+      </html>
+    `
+    printWindow.document.write(slipContent)
+    printWindow.document.close()
+    printWindow.onload = async () => {
+      printWindow.print()
+      printWindow.close()
+      // After printing, update status to in_progress
+      await updateOrderStatus(order.id, "in_progress")
+    }
+  }
 
   const clearCompletedOrders = async () => {
     if (!confirm("Are you sure you want to permanently delete all completed orders? This action cannot be undone.")) {
@@ -632,6 +844,57 @@ export default function AdminDashboardPage() {
       })
     }
   }
+
+  // Add this function inside your AdminDashboardPage component
+  const printReceiptSection = () => {
+    const receipt = document.querySelector('.receipt');
+    if (!receipt) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          @media print {
+            html, body {
+              width: 80mm;
+              min-width: 80mm;
+              max-width: 80mm;
+              margin: 0;
+              padding: 0;
+              font-size: 13px;
+              background: #fff;
+            }
+            .receipt {
+              margin: 0;
+              padding: 0;
+              width: 80mm;
+              box-sizing: border-box;
+            }
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">${receipt.innerHTML}</div>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.close();
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   if (loading) {
     return (

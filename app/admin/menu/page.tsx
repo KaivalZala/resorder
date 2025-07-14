@@ -306,7 +306,7 @@ export default function MenuManagementPage() {
     description: "",
     price: "",
     category: "",
-    tags: [] as string[],
+    tags: "",
     in_stock: true,
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -477,9 +477,8 @@ export default function MenuManagementPage() {
           })
         } else {
           setUploadError(uploadResult.error || "Upload failed")
-
           const continueWithoutImage = confirm(
-            `Image upload failed: ${uploadResult.error}\n\nDo you want to save the menu item without the new image?`,
+            `Image upload failed: ${uploadResult.error}\n\nDo you want to save the menu item without the new image?`
           )
 
           if (!continueWithoutImage) {
@@ -715,3 +714,7 @@ export default function MenuManagementPage() {
     </div>
   )
 }
+
+
+
+
