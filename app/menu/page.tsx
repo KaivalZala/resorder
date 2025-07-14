@@ -32,6 +32,8 @@ export default function MenuPage() {
   const router = useRouter()
   const supabase = createClient()
   const { toast } = useToast()
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+
 
   useEffect(() => {
     if (!state.tableNumber) {
@@ -231,18 +233,46 @@ export default function MenuPage() {
       {/* Enhanced Category Filter */}
       <div className="sticky top-0 bg-[#7a7a4d] backdrop-blur-lg shadow-xl z-30 p-6 border-b border-[#C7C6A1] rounded-b-3xl">
         <div className="max-w-6xl mx-auto">
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide hide-horizontal-scrollbar">
+          {/* Responsive Category Filter */}
+          <div className="block md:hidden">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setShowCategoryMenu(true)}
+              className="rounded-full bg-white/80 text-[#7A7A4D] border-2 border-[#C7C6A1] shadow-md flex items-center gap-2 px-4 py-2 font-serif text-base font-semibold ml-[40px]"
+            >
+              <span>{getCategoryIcon(selectedCategory)}</span>
+              <span>Select Category</span>
+            </Button>
+            {showCategoryMenu && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowCategoryMenu(false)}>
+                <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xs w-full" onClick={e => e.stopPropagation()}>
+                  <div className="flex flex-col gap-3">
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => { setSelectedCategory(category); setShowCategoryMenu(false); }}
+                        className={`flex items-center gap-2 whitespace-nowrap font-serif tracking-wide text-base px-4 py-2 rounded-full border-2 border-[#C7C6A1] shadow-md ${selectedCategory === category ? "bg-gradient-to-r from-orange-500 to-red-500 text-white border-none" : "bg-white/80 text-[#7A7A4D] hover:bg-[#B7B78A] hover:text-[#7A7A4D]"}`}
+                      >
+                        <span>{getCategoryIcon(category)}</span>
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-hide hide-horizontal-scrollbar">
             {categories.map((category, index) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
-                className={`whitespace-nowrap transition-all duration-300 animate-slide-up font-serif tracking-wide text-base px-6 py-2 rounded-full border-2 border-[#C7C6A1] shadow-md ${
-                  selectedCategory === category
-                    ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105 border-none"
-                    : "bg-white/80 text-[#7A7A4D] hover:bg-[#B7B78A] hover:text-[#7A7A4D] hover:scale-105 hover:shadow-lg"
-                }`}
+                className={`whitespace-nowrap transition-all duration-300 animate-slide-up font-serif tracking-wide text-base px-6 py-2 rounded-full border-2 border-[#C7C6A1] shadow-md ${selectedCategory === category ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105 border-none" : "bg-white/80 text-[#7A7A4D] hover:bg-[#B7B78A] hover:text-[#7A7A4D] hover:scale-105 hover:shadow-lg"}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <span className="mr-2">{getCategoryIcon(category)}</span>
@@ -464,17 +494,18 @@ export default function MenuPage() {
         <div className="fixed bottom-8 right-8 z-40 flex flex-col gap-6 items-end">
           {activeOrders.length > 0 && (
             <>
-              <Button
-                onClick={() => setOrdersDialogOpen(true)}
-                size="lg"
-                className="rounded-full shadow-2xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold px-8 py-5 animate-pulse-glow hover:scale-110 transition-all duration-300 text-xl font-serif"
-              >
-                <Clock className="h-7 w-7 mr-4" />
-                <div className="text-left">
-                  <div className="text-base opacity-90">View All Orders</div>
-                  <div className="text-2xl font-bold">Table #{state.tableNumber}</div>
-                </div>
-              </Button>
+<Button
+  onClick={() => setOrdersDialogOpen(true)}
+  size="lg"
+  className="rounded-full shadow-2xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold px-10 py-5 hover:scale-105 transition-all duration-300"
+>
+  <Clock className="h-6 w-6 mr-3" />
+  <div className="text-left leading-tight">
+    <div className="text-sm">View All Orders</div>
+    <div className="text-lg font-bold">Table #{state.tableNumber}</div>
+  </div>
+</Button>
+
               <Dialog open={ordersDialogOpen} onOpenChange={setOrdersDialogOpen}>
                 <DialogContent className="max-w-xl rounded-3xl shadow-2xl border border-[#C7C6A1] bg-white/95">
                   <DialogHeader>
@@ -505,14 +536,14 @@ export default function MenuPage() {
             <Button
               onClick={() => router.push("/cart")}
               size="lg"
-              className="rounded-full shadow-2xl bg-[#7a7a4d] hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-5 animate-pulse-glow hover:scale-110 transition-all duration-300 text-xl font-serif"
+              className="rounded-full shadow-2xl bg-[#7a7a4d] text-white font-bold px-8 py-5 text-[1.2rem] flex items-center min-w-[240px] min-h-[60px]"
             >
-              <ShoppingCart className="h-7 w-7 mr-4" />
-              <div className="text-left">
-                <div className="text-base opacity-90">
+              <ShoppingCart className="h-8 w-8 mr-5" />
+              <div className="flex flex-col justify-center text-left w-full">
+                <div className="text-lg opacity-90 leading-tight whitespace-nowrap font-semibold">
                   Table #{state.tableNumber} • {getCartCount()} items
                 </div>
-                <div className="text-2xl font-bold">₹{getCartTotal().toFixed(2)}</div>
+                <div className="text-xl font-extrabold leading-tight">₹{getCartTotal().toFixed(2)}</div>
               </div>
             </Button>
           )}
@@ -521,3 +552,4 @@ export default function MenuPage() {
     </div>
   )
 }
+

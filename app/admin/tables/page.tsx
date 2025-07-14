@@ -307,7 +307,16 @@ export default function TableManagementPage() {
 
         <div className="grid gap-3 xs:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((table) => (
-            <Card key={table.id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={table.id}
+              className={`hover:shadow-lg transition-shadow ${
+                table.status === "free"
+                  ? "bg-green-50 border-green-200"
+                  : table.status === "serving"
+                  ? "bg-yellow-50 border-yellow-200"
+                  : "bg-blue-50 border-blue-200"
+              }`}
+            >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">Table #{table.table_number}</CardTitle>
@@ -337,6 +346,30 @@ export default function TableManagementPage() {
                         <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`flex-1 cycle-status-btn font-semibold border-2 shadow-sm ${
+                        table.status === "free"
+                          ? "bg-green-200 text-green-900 border-green-400 hover:bg-green-300"
+                          : table.status === "serving"
+                          ? "bg-yellow-200 text-yellow-900 border-yellow-400 hover:bg-yellow-300"
+                          : "bg-blue-200 text-blue-900 border-blue-400 hover:bg-blue-300"
+                      }`}
+                      onClick={() => {
+                        let nextStatus: Table["status"];
+                        if (table.status === "free") nextStatus = "serving";
+                        else if (table.status === "serving") nextStatus = "completed";
+                        else nextStatus = "free";
+                        updateTableStatus(table, nextStatus);
+                      }}
+                    >
+                      {getStatusIcon(table.status)}
+                      <span className="ml-2 capitalize">{table.status} (Next: {table.status === "free" ? "serving" : table.status === "serving" ? "completed" : "free"})</span>
+                    </Button>
                   </div>
 
                   <div className="flex gap-2">
