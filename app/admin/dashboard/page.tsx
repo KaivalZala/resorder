@@ -130,6 +130,25 @@ export default function AdminDashboardPage() {
         timestamp: new Date().toISOString(),
       })
 
+      // If marking as in_progress, update table status to 'serving'
+      if (status === "in_progress") {
+        const order = orders.find((o) => o.id === orderId)
+        if (order && order.table_number) {
+          const { error: tableError } = await supabase
+            .from("tables")
+            .update({ status: "serving" })
+            .eq("table_number", order.table_number)
+          if (tableError) {
+            console.error("Error updating table status to 'serving':", tableError)
+            toast({
+              title: "Table status update failed",
+              description: "Order accepted but table status could not be updated.",
+              variant: "destructive",
+            })
+          }
+        }
+      }
+
       toast({
         title: "Order updated",
         description: `Order status changed to ${status.replace("_", " ")}`,
@@ -144,7 +163,6 @@ export default function AdminDashboardPage() {
       })
     }
   }
-
 
   const printOrder = async (order: Order) => {
     const printWindow = window.open("", "_blank")
@@ -538,9 +556,24 @@ export default function AdminDashboardPage() {
     printWindow.document.close()
 
     // Wait for content to load then print
-    printWindow.onload = () => {
+    printWindow.onload = async () => {
       printWindow.print()
       printWindow.close()
+      // After printing, set table status to 'free'
+      const orderTableNumber = order.table_number
+      if (orderTableNumber) {
+        const { error: tableError } = await supabase
+          .from("tables")
+          .update({ status: "free" })
+          .eq("table_number", orderTableNumber)
+        if (tableError) {
+          toast({
+            title: "Table status update failed",
+            description: "Bill printed but table status could not be updated.",
+            variant: "destructive",
+          })
+        }
+      }
     }
   }
 

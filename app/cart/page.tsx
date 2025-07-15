@@ -494,7 +494,7 @@ export default function CartPage() {
       dispatch({ type: "CLEAR_CART" })
 
       toast({
-        title: "Order placed successfully! 🎉",
+        title: "Order placed successfully! ",
         description: "Redirecting to order tracking...",
       })
 

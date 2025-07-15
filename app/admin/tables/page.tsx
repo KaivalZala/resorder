@@ -21,9 +21,10 @@ export default function TableManagementPage() {
   const [saving, setSaving] = useState(false)
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState({
+  type TableStatus = "free" | "serving" | "completed"
+  const [formData, setFormData] = useState<{ table_number: string; status: TableStatus }>({
     table_number: "",
-    status: "free" as const,
+    status: "free",
   })
   const router = useRouter()
   const supabase = createClient()
@@ -320,9 +321,24 @@ export default function TableManagementPage() {
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">Table #{table.table_number}</CardTitle>
-                  <Badge className={getStatusColor(table.status)}>
+                  <Badge
+                    className={getStatusColor(table.status)}
+                    title={
+                      table.status === "free"
+                        ? "Table is available for new customers."
+                        : table.status === "serving"
+                        ? "Table is currently serving customers."
+                        : table.status === "completed"
+                        ? "Completed, ready to be freed."
+                        : ""
+                    }
+                  >
                     {getStatusIcon(table.status)}
-                    <span className="ml-1">{table.status}</span>
+                    <span className="ml-1 font-semibold">
+                      {table.status === "free" && "Free"}
+                      {table.status === "serving" && "Serving"}
+                      {table.status === "completed" && "Completed"}
+                    </span>
                   </Badge>
                 </div>
               </CardHeader>
@@ -330,22 +346,6 @@ export default function TableManagementPage() {
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600">
                     Created: {new Date(table.created_at).toLocaleDateString()}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Select
-                      value={table.status}
-                      onValueChange={(value: Table["status"]) => updateTableStatus(table, value)}
-                    >
-                      <SelectTrigger className="flex-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="free">Free</SelectItem>
-                        <SelectItem value="serving">Serving</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
 
                   <div className="flex gap-2">

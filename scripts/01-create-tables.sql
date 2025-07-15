@@ -27,6 +27,8 @@ CREATE TABLE public.menu_items (
   category TEXT NOT NULL,
   tags TEXT[] DEFAULT '{}',
   in_stock BOOLEAN DEFAULT true,
+  discount DECIMAL(10,2),
+  discount_type TEXT CHECK (discount_type IN ('percentage', 'fixed')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

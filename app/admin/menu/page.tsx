@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,6 +25,55 @@ import {
 } from "@/lib/storage-utils-fallback"
 
 // Define FormContent outside the main component to prevent re-creation on every render
+interface FormContentProps {
+  formData: {
+    name: string
+    description: string
+    price: string
+    category: string
+    tags: string[]
+    in_stock: boolean
+    order: number
+    discount: number
+    discount_type: 'percentage' | 'fixed'
+  }
+  setFormData: React.Dispatch<React.SetStateAction<{
+    name: string
+    description: string
+    price: string
+    category: string
+    tags: string[]
+    in_stock: boolean
+    order: number
+    discount: number
+    discount_type: 'percentage' | 'fixed'
+  }>>
+  imageFile: File | null
+  setImageFile: React.Dispatch<React.SetStateAction<File | null>>
+  imagePreview: string | null
+  setImagePreview: React.Dispatch<React.SetStateAction<string | null>>
+  imageUrl: string
+  setImageUrl: React.Dispatch<React.SetStateAction<string>>
+  uploadingImage: boolean
+  uploadError: string | null
+  bucketExists: boolean | null
+  saving: boolean
+  isEditing: boolean
+  selectedItem: MenuItem | null
+  useExternalUrl: boolean
+  setUseExternalUrl: React.Dispatch<React.SetStateAction<boolean>>
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleImageUrlChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleSave: () => void
+  resetForm: () => void
+  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  handleTagToggle: (tag: string) => void
+  clearImage: () => void
+  categories: string[]
+  availableTags: string[]
+  menuItems: MenuItem[]
+}
+
 const FormContent = ({
   formData,
   setFormData,
@@ -53,48 +100,16 @@ const FormContent = ({
   clearImage,
   categories,
   availableTags,
-}: {
-  formData: {
-    name: string
-    description: string
-    price: string
-    category: string
-    tags: string[]
-    in_stock: boolean
-  }
-  setFormData: React.Dispatch<React.SetStateAction<{
-    name: string
-    description: string
-    price: string
-    category: string
-    tags: string[]
-    in_stock: boolean
-  }>>
-  imageFile: File | null
-  setImageFile: React.Dispatch<React.SetStateAction<File | null>>
-  imagePreview: string | null
-  setImagePreview: React.Dispatch<React.SetStateAction<string | null>>
-  imageUrl: string
-  setImageUrl: React.Dispatch<React.SetStateAction<string>>
-  uploadingImage: boolean
-  uploadError: string | null
-  bucketExists: boolean | null
-  saving: boolean
-  isEditing: boolean
-  selectedItem: MenuItem | null
-  useExternalUrl: boolean
-  setUseExternalUrl: React.Dispatch<React.SetStateAction<boolean>>
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleImageUrlChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleSave: () => void
-  resetForm: () => void
-  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
-  handleTagToggle: (tag: string) => void
-  clearImage: () => void
-  categories: string[]
-  availableTags: string[]
-}) => (
+  menuItems,
+}: FormContentProps) => (
   <div className="space-y-4">
+    {isEditing && selectedItem && menuItems && (
+      <div className="mb-2 text-sm text-gray-600">
+        Sequence: #{
+          menuItems.findIndex((item) => item.id === selectedItem.id) + 1
+        }
+      </div>
+    )}
     <div className="grid grid-cols-2 gap-4">
       <div>
         <Label htmlFor="name">Name *</Label>
@@ -115,6 +130,42 @@ const FormContent = ({
           onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
           placeholder="0.00"
         />
+      </div>
+      <div>
+        <Label htmlFor="order">Order</Label>
+        <Input
+          id="order"
+          type="number"
+          value={formData.order}
+          onChange={(e) => setFormData((prev) => ({ ...prev, order: Number(e.target.value) }))}
+          placeholder="Order"
+        />
+      </div>
+      <div>
+        <Label htmlFor="discount">Discount</Label>
+        <Input
+          id="discount"
+          type="number"
+          step="0.01"
+          value={formData.discount}
+          onChange={(e) => setFormData((prev) => ({ ...prev, discount: Number(e.target.value) }))}
+          placeholder="Discount"
+        />
+      </div>
+      <div>
+        <Label htmlFor="discount_type">Discount Type</Label>
+        <Select
+          value={formData.discount_type}
+          onValueChange={(value) => setFormData((prev) => ({ ...prev, discount_type: value as 'percentage' | 'fixed' }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select discount type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="fixed">Fixed</SelectItem>
+            <SelectItem value="percentage">Percentage</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
 
@@ -297,6 +348,41 @@ const FormContent = ({
 )
 
 export default function MenuManagementPage() {
+  // ...existing state declarations...
+  // Add this function to move menu items up or down
+  const moveMenuItem = async (idx: number, direction: "up" | "down") => {
+    if (
+      (direction === "up" && idx === 0) ||
+      (direction === "down" && idx === menuItems.length - 1)
+    ) {
+      return
+    }
+    const newMenuItems = [...menuItems]
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    // Swap order fields
+    const tempOrder = newMenuItems[idx].order
+    newMenuItems[idx].order = newMenuItems[swapIdx].order
+    newMenuItems[swapIdx].order = tempOrder
+    // Swap in array
+    ;[newMenuItems[idx], newMenuItems[swapIdx]] = [newMenuItems[swapIdx], newMenuItems[idx]]
+    setMenuItems(newMenuItems)
+    // Update backend for both items
+    try {
+      await Promise.all([
+        supabase.from("menu_items").update({ order: newMenuItems[idx].order }).eq("id", newMenuItems[idx].id),
+        supabase.from("menu_items").update({ order: newMenuItems[swapIdx].order }).eq("id", newMenuItems[swapIdx].id),
+      ])
+    } catch (err) {
+      toast({
+        title: "Order update error",
+        description: "Could not update menu item order. Please try again.",
+        variant: "destructive",
+      })
+      // Optionally, refetch menu items to restore correct state
+      fetchMenuItems()
+    }
+  }
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -306,8 +392,11 @@ export default function MenuManagementPage() {
     description: "",
     price: "",
     category: "",
-    tags: "",
+    tags: [],
     in_stock: true,
+    order: 0,
+    discount: 0,
+    discount_type: "fixed",
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -357,7 +446,7 @@ export default function MenuManagementPage() {
 
   const fetchMenuItems = async () => {
     try {
-      const { data, error } = await supabase.from("menu_items").select("*").order("category").order("name")
+      const { data, error } = await supabase.from("menu_items").select("*").order("order", { ascending: true }).order("category").order("name")
 
       if (error) throw error
       setMenuItems(data || [])
@@ -376,6 +465,9 @@ export default function MenuManagementPage() {
       category: "",
       tags: [],
       in_stock: true,
+      order: 0,
+      discount: 0,
+      discount_type: "fixed",
     })
     setImageFile(null)
     setImagePreview(null)
@@ -388,6 +480,8 @@ export default function MenuManagementPage() {
 
   const handleEdit = (item: MenuItem) => {
     setSelectedItem(item)
+    // Find the visible sequence (index+1) in the current menuItems array
+    const visibleOrder = menuItems.findIndex((m) => m.id === item.id) + 1
     setFormData({
       name: item.name || "",
       description: item.description || "",
@@ -395,6 +489,9 @@ export default function MenuManagementPage() {
       category: item.category || "",
       tags: item.tags || [],
       in_stock: item.in_stock ?? true,
+      order: visibleOrder,
+      discount: item.discount ?? 0,
+      discount_type: item.discount_type ?? "fixed",
     })
     setImagePreview(item.image_url || null)
     setImageUrl(item.image_url || "")
@@ -493,12 +590,15 @@ export default function MenuManagementPage() {
 
       const itemData = {
         name: formData.name,
-        description: formData.description || null,
-        price: Number.parseFloat(formData.price),
+        description: formData.description,
+        price: parseFloat(formData.price),
         category: formData.category,
         tags: formData.tags,
         in_stock: formData.in_stock,
         image_url: finalImageUrl,
+        order: formData.order,
+        discount: formData.discount,
+        discount_type: formData.discount_type,
         updated_at: new Date().toISOString(),
       }
 
@@ -510,6 +610,25 @@ export default function MenuManagementPage() {
         if (error) throw error
       }
 
+      // Resequence all menu items' order fields to be continuous starting from 1
+      const { data: allItems, error: fetchError } = await supabase.from("menu_items").select("id").order("order", { ascending: true })
+      if (fetchError) throw fetchError
+      if (allItems && allItems.length > 0) {
+        for (let i = 0; i < allItems.length; i++) {
+          const itemId = allItems[i].id
+          const newOrder = i + 1
+          const { error: updateError } = await supabase.from("menu_items").update({ order: newOrder }).eq("id", itemId)
+          if (updateError) {
+            console.error(`Error updating order for item ${itemId}:`, updateError)
+            toast({
+              title: "Order update error",
+              description: `Could not update order for item ${itemId}: ${updateError.message}`,
+              variant: "destructive",
+            })
+          }
+        }
+      }
+
       toast({
         title: "Success! 🎉",
         description: `Menu item ${isEditing ? "updated" : "created"} successfully.`,
@@ -519,10 +638,10 @@ export default function MenuManagementPage() {
       setDialogOpen(false)
       fetchMenuItems()
     } catch (error) {
-      console.error("Error saving menu item:", error)
+      console.error("Error saving menu item:", error, JSON.stringify(error))
       toast({
         title: "Error saving menu item",
-        description: "Please try again.",
+        description: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : "Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -648,13 +767,14 @@ export default function MenuManagementPage() {
                 clearImage={clearImage}
                 categories={categories}
                 availableTags={availableTags}
+                menuItems={menuItems}
               />
             </DialogContent>
           </Dialog>
         </div>
 
         <div className="grid gap-3 xs:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
-          {menuItems.map((item) => (
+          {menuItems.map((item, idx) => (
             <Card key={item.id} className={`${!item.in_stock ? "opacity-60" : ""}`}>
               <div className="relative">
                 <Image
@@ -664,9 +784,14 @@ export default function MenuManagementPage() {
                   height={200}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
-                <div className="absolute top-2 right-2">
-                  <Switch checked={item.in_stock} onCheckedChange={() => toggleStock(item)} size="sm" />
-                </div>
+                <div className="absolute top-2 left-2">
+  <div className="bg-orange-500 text-white rounded-full px-3 py-1 text-xs font-bold shadow">
+    #{idx + 1}
+  </div>
+</div>
+<div className="absolute top-2 right-2">
+  <Switch checked={item.in_stock} onCheckedChange={() => toggleStock(item)} size="sm" />
+</div>
               </div>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
@@ -704,6 +829,26 @@ export default function MenuManagementPage() {
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="p-0 m-0 h-8 w-8 flex items-center justify-center"
+                    onClick={async () => moveMenuItem(idx, "up")}
+                    disabled={idx === 0}
+                    title="Move Up"
+                  >
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="p-0 m-0 h-8 w-8 flex items-center justify-center"
+                    onClick={async () => moveMenuItem(idx, "down")}
+                    disabled={idx === menuItems.length - 1}
+                    title="Move Down"
+                  >
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7" /></svg>
                   </Button>
                 </div>
               </CardContent>

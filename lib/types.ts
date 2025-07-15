@@ -1,4 +1,7 @@
 export interface MenuItem {
+  order?: number // display order
+  discount?: number // discount value
+  discount_type?: 'percentage' | 'fixed' // type of discount
   id: string
   name: string
   image_url: string | null

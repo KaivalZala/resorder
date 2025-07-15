@@ -84,6 +84,7 @@ export default function MenuPage() {
         .from("menu_items")
         .select("*")
         .eq("in_stock", true)
+        .order("order", { ascending: true })
         .order("category")
         .order("name")
 
@@ -321,8 +322,26 @@ export default function MenuPage() {
                     />
                   </button>
                   <div className="absolute bottom-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full font-bold shadow-lg text-lg">
-                    ₹{item.price.toFixed(2)}
+                    {item.discount && item.discount > 0 ? (
+                      <>
+                        <span className="line-through text-red-200 mr-2 text-base">₹{item.price.toFixed(2)}</span>
+                        <span className="text-white text-lg font-bold">
+                          ₹{item.discount_type === 'percentage'
+                            ? (item.price * (1 - item.discount / 100)).toFixed(2)
+                            : (item.price - item.discount).toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <>₹{item.price.toFixed(2)}</>
+                    )}
                   </div>
+                  {item.discount && item.discount > 0 && (
+                    <div className="absolute bottom-4 left-4 bg-yellow-400 text-black px-3 py-1 rounded-full font-bold shadow text-xs">
+                      {item.discount_type === 'percentage'
+                        ? `${item.discount}% OFF`
+                        : `₹${item.discount} OFF`}
+                    </div>
+                  )}
                 </div>
                 <div className="p-7">
                   <div className="flex justify-between items-start mb-4">
