@@ -1,36 +1,4 @@
-// 'use client';
-// import React from "react";
-// import { useRouter } from "next/navigation";
-// import { Button } from "@/components/ui/button";
 
-// const games = [
-//   { name: "Memory Game", path: "/spin/all-games/memorygame" },
-//   { name: "Guess The Dish", path: "/spin/all-games/guessthedish" },
-//   { name: "Who Pays", path: "/spin/all-games/whopayspage" },
-//   { name: "Draw Your Dish", path: "/spin/all-games/drawyourdish" },
-//   { name: "Bill Pay", path: "/spin/all-games/billpay" }
-// ];
-
-// export default function SpinGamesPage() {
-//   const router = useRouter();
-//   return (
-//     <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-gradient-to-br from-orange-50 to-red-50">
-//       <h1 className="text-4xl font-extrabold mb-4 text-orange-600 drop-shadow">Spin Zone: Choose a Game!</h1>
-//       <p className="mb-8 text-lg text-gray-700">Welcome to the fun zone! Pick a game below and challenge your friends or yourself. Each game is a unique experience!</p>
-//       <div className="flex flex-col gap-4 w-full max-w-xs">
-//         {games.map((game) => (
-//           <Button key={game.path} onClick={() => router.push(game.path)} className="w-full text-lg py-6 shadow-lg hover:scale-105 transition-transform">
-//             {game.name}
-//           </Button>
-//         ))}
-//       </div>
-//       <div className="mt-10 flex flex-col items-center gap-2 text-sm text-gray-500">
-//         <span>More games coming soon!</span>
-//         <span className="italic">Enjoy and have fun 🎉</span>
-//       </div>
-//     </div>
-//   );
-// }
 
 
 
