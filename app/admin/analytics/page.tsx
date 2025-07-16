@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  ArrowLeft,
   DollarSign,
   TrendingUp,
   Clock,
@@ -17,6 +16,7 @@ import {
   BarChart3,
   Users,
   Target,
+  ArrowLeft,
 } from "lucide-react"
 import { createClient } from "@/utils/supabase/client"
 import type { Order } from "@/lib/types"
@@ -51,7 +51,6 @@ export default function AnalyticsPage() {
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState<"today" | "week" | "month">("today")
-  const router = useRouter()
   const supabase = createClient()
   const { toast } = useToast()
 
@@ -59,7 +58,6 @@ export default function AnalyticsPage() {
   const [clearingAnalytics, setClearingAnalytics] = useState(false)
 
   useEffect(() => {
-    checkAuth()
     fetchAnalytics()
     fetchRecentOrders()
 
@@ -86,21 +84,7 @@ export default function AnalyticsPage() {
     }
   }, [])
 
-  const checkAuth = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      router.push("/admin/login")
-      return
-    }
 
-    const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
-
-    if (!userData || !["admin", "staff"].includes(userData.role)) {
-      router.push("/admin/dashboard")
-    }
-  }
 
   const fetchAnalytics = async () => {
     try {

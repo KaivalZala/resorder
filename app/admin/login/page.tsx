@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
         title: "Login successful",
         description: "Welcome to the admin panel!",
       })
-
+      
       router.push("/admin/dashboard")
     } catch (error: any) {
       toast({

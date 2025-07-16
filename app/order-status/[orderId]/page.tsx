@@ -18,6 +18,8 @@ import type { Order } from "@/lib/types"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { useToast } from "@/hooks/use-toast"
 import { useCart } from "@/lib/cart-context"
+import type { BillingSettings } from "@/lib/types"
+import jsPDF from "jspdf"
 
 
 
@@ -33,9 +35,11 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
   const supabase = createClient()
   const { toast } = useToast()
   const { dispatch } = useCart()
+  const [billingSettings, setBillingSettings] = useState<BillingSettings[]>([])
 
   useEffect(() => {
     fetchOrder()
+    fetchBillingSettings()
 
     // Set up real-time subscription with better handling
     const channel = supabase
@@ -99,6 +103,20 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchBillingSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("billing_settings")
+        .select("*")
+        .eq("is_active", true)
+        .order("calculation_order")
+      if (error) throw error
+      setBillingSettings(data || [])
+    } catch (error) {
+      console.error("Error fetching billing settings:", error)
     }
   }
 
@@ -182,6 +200,84 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
     }
   }
 
+  function downloadBill() {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    // Header
+    doc.setFontSize(28);
+    doc.setFont(undefined, "bold");
+    doc.text("Bella Vista", 297.5, 60, { align: "center" });
+    doc.setFontSize(16);
+    doc.setFont(undefined, "normal");
+    doc.text("Order Receipt", 297.5, 90, { align: "center" });
+    doc.setLineWidth(1.2);
+    doc.line(60, 105, 535, 105);
+    // Order Info
+    let y = 130;
+    doc.setFontSize(12);
+    doc.setFont(undefined, "normal");
+    doc.text("Order ID:", 70, y);
+    doc.text(`${order?.id?.slice(0, 8) || "-"}`, 170, y);
+    y += 20;
+    doc.text("Table:", 70, y);
+    doc.text(`${order?.table_number || "-"}`, 170, y);
+    y += 20;
+    doc.text("Date:", 70, y);
+    doc.text(`${order?.created_at ? new Date(order.created_at).toLocaleString() : "-"}`, 170, y);
+    y += 30;
+    // Items Table Header
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(13);
+    doc.text("Item", 70, y);
+    doc.text("Qty", 300, y, { align: "right" });
+    doc.text("Price", 370, y, { align: "right" });
+    doc.text("Total", 470, y, { align: "right" });
+    y += 8;
+    doc.setLineWidth(0.8);
+    doc.line(60, y, 535, y);
+    y += 18;
+    doc.setFont(undefined, "normal");
+    doc.setFontSize(12);
+    (order?.items || []).forEach(item => {
+      doc.text(`${item.name}`, 70, y);
+      doc.text(`${item.quantity}`, 300, y, { align: "right" });
+      doc.text(`Rs. ${item.price.toFixed(2)}`, 370, y, { align: "right" });
+      doc.text(`Rs. ${(item.price * item.quantity).toFixed(2)}`, 470, y, { align: "right" });
+      y += 18;
+    });
+    y += 5;
+    doc.setLineWidth(0.8);
+    doc.line(60, y, 535, y);
+    y += 20;
+    // Billing Fields
+    (billingSettings || []).forEach(field => {
+      let baseAmount = field.applies_to === "subtotal" ? order?.total_amount || 0 : order?.total_amount || 0;
+      let amount = 0;
+      if (field.field_type === "percentage" || field.field_type === "tax") {
+        amount = (baseAmount * field.field_value) / 100;
+      } else if (field.field_type === "fixed_amount") {
+        amount = field.field_value;
+      }
+      doc.text(`${field.field_label}:`, 320, y);
+      doc.text(`Rs. ${amount.toFixed(2)}`, 470, y, { align: "right" });
+      y += 18;
+    });
+    y += 5;
+    doc.setLineWidth(0.8);
+    doc.line(60, y, 535, y);
+    y += 20;
+    // Total
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(15);
+    doc.text("Total:", 320, y);
+    doc.text(`Rs. ${order?.total_amount?.toFixed(2) || "-"}`, 470, y, { align: "right" });
+    y += 30;
+    // Footer
+    doc.setFont(undefined, "normal");
+    doc.setFontSize(13);
+    doc.text("Thank you for dining with us!", 297.5, y, { align: "center" });
+    doc.save(`Order_${order?.id?.slice(0, 8) || "-"}_Bill.pdf`);
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -216,6 +312,57 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+      <style>{`
+        @page {
+          size: 80mm auto;
+          margin: 0;
+        }
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 80mm;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            background: #fff;
+          }
+          .print\\:block {
+            page-break-inside: avoid;
+            width: 80mm !important;
+            box-sizing: border-box;
+            margin: 0 auto !important;
+            padding: 10px !important;
+            border: 1px solid #000 !important;
+            background: #fff !important;
+            box-shadow: none !important;
+            font-size: 13px !important;
+            min-width: 80mm !important;
+            max-width: 80mm !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+          }
+          .print\\:block * {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .print\\:block h2, .print\\:block .text-xl, .print\\:block .font-bold {
+            font-size: 16px !important;
+          }
+          .print\\:block .text-lg {
+            font-size: 14px !important;
+          }
+          .print\\:block .text-sm {
+            font-size: 12px !important;
+          }
+          .print\\:block .text-center {
+            text-align: center !important;
+          }
+          .print\\:block .print-hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
 
 
 
@@ -387,6 +534,57 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                   <span>Total Amount</span>
                   <span>₹{order.total_amount.toFixed(2)}</span>
                 </div>
+                {/* Bill and Print Button - Only show when order is completed */}
+                {order.status === "completed" && (
+                  <div className="mt-6 p-4 bg-white rounded-lg shadow border border-gray-200 print:block print:shadow-none print:border-0 print:mt-0 print:p-0">
+                    <h2 className="text-xl font-bold mb-2 print:hidden">Bill</h2>
+                    <div className="mb-2 text-center">
+                      <span className="block text-lg font-bold">Bella Vista</span>
+                      <span className="block text-sm text-gray-500">Order Receipt</span>
+                    </div>
+                    <div className="mb-2">
+                      <div className="flex justify-between"><span>Order ID:</span><span>{order.id.slice(0, 8)}</span></div>
+                      <div className="flex justify-between"><span>Table:</span><span>{order.table_number}</span></div>
+                      <div className="flex justify-between"><span>Date:</span><span>{new Date(order.created_at).toLocaleString()}</span></div>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="mb-2">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-sm">
+                          <span>{item.name} x{item.quantity}</span>
+                          <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-2" />
+                    {billingSettings.map((field, idx) => {
+                      let baseAmount = field.applies_to === "subtotal" ? order.total_amount : order.total_amount
+                      let amount = 0
+                      if (field.field_type === "percentage" || field.field_type === "tax") {
+                        amount = (baseAmount * field.field_value) / 100
+                      } else if (field.field_type === "fixed_amount") {
+                        amount = field.field_value
+                      }
+                      return (
+                        <div key={idx} className="flex justify-between text-sm">
+                          <span>{field.field_label}</span>
+                          <span>₹{amount.toFixed(2)}</span>
+                        </div>
+                      )
+                    })}
+                    <Separator className="my-2" />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total</span>
+                      <span>₹{order.total_amount.toFixed(2)}</span>
+                    </div>
+                    <Button
+                      className="mt-4 w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold print:hidden"
+                      onClick={downloadBill}
+                    >
+                      Download Bill
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -407,6 +605,37 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     Continue Ordering
                   </Button>
+                  
+                  {/* Who Pays the Bill Button */}
+                  <Button
+                    onClick={() => router.push("/spin/all-games/billpay")}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5 mr-2">
+                      <circle cx="6" cy="6" r="1.5" />
+                      <circle cx="18" cy="6" r="1.5" />
+                      <circle cx="12" cy="12" r="1.5" />
+                      <circle cx="6" cy="18" r="1.5" />
+                      <circle cx="18" cy="18" r="1.5" />
+                    </svg>
+                    Who Pays the Bill?
+                  </Button>
+
+                  {/* Google Feedback Button - Always visible */}
+                  <a
+                    href="https://search.google.com/local/writereview?placeid=ChIJL-oxRgDT4jsRShN9f0MJg90"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mt-2"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full border-2 border-green-400 hover:bg-green-50 text-green-700 font-bold flex items-center justify-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-5 w-5"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.23l6.87-6.87C35.67 2.15 30.18 0 24 0 14.82 0 6.71 5.48 2.69 13.44l8.06 6.26C12.67 13.13 17.89 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.43-4.74H24v9.01h12.42c-.54 2.89-2.18 5.34-4.66 7.01l7.18 5.59C43.93 37.13 46.1 31.38 46.1 24.55z"/><path fill="#FBBC05" d="M10.75 28.69A14.5 14.5 0 0 1 9.5 24c0-1.63.28-3.21.75-4.69l-8.06-6.26A23.93 23.93 0 0 0 0 24c0 3.93.94 7.65 2.69 10.95l8.06-6.26z"/><path fill="#EA4335" d="M24 48c6.18 0 11.36-2.05 15.13-5.59l-7.18-5.59c-2.01 1.35-4.59 2.16-7.95 2.16-6.11 0-11.33-3.63-13.25-8.71l-8.06 6.26C6.71 42.52 14.82 48 24 48z"/></g></svg>
+                      Give Feedback on Google
+                    </Button>
+                  </a>
 
                   {order.status === "pending" && (
                     <>
@@ -422,10 +651,6 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
                         <XCircle className="h-4 w-4 mr-2" />
                         Cancel Order
                       </Button>
-                      
-
-
-                      
                     </>
                   )}
                 </div>
@@ -467,3 +692,8 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
     </div>
   )
 }
+
+// Add this style block at the top level of the component (before the return statement)
+
+// Add this helper function inside the component, before the return statement
+// (Moved inside OrderStatusPage for state access)

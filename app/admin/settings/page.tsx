@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Plus, Edit, Trash2, GripVertical } from "lucide-react"
+import { Plus, Edit, Trash2, GripVertical, ArrowLeft } from "lucide-react"
 import { createClient } from "@/utils/supabase/client"
 import type { BillingSettings } from "@/lib/types"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
@@ -30,30 +29,14 @@ export default function SettingsPage() {
     applies_to: "subtotal" as const,
     is_active: true,
   })
-  const router = useRouter()
   const supabase = createClient()
   const { toast } = useToast()
 
   useEffect(() => {
-    checkAuth()
     fetchBillingSettings()
   }, [])
 
-  const checkAuth = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      router.push("/admin/login")
-      return
-    }
 
-    const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
-
-    if (!userData || userData.role !== "admin") {
-      router.push("/admin/dashboard")
-    }
-  }
 
   const fetchBillingSettings = async () => {
     try {

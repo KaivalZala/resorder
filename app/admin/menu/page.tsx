@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Plus, Edit, Trash2, ArrowLeft, Upload, AlertCircle, CheckCircle, X, ExternalLink } from "lucide-react"
+import { Plus, Edit, Trash2, Upload, AlertCircle, CheckCircle, X, ExternalLink, ArrowLeft } from "lucide-react"
 import { createClient } from "@/utils/supabase/client"
 import type { MenuItem } from "@/lib/types"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
@@ -407,7 +406,6 @@ export default function MenuManagementPage() {
   const [saving, setSaving] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [useExternalUrl, setUseExternalUrl] = useState(false)
-  const router = useRouter()
   const supabase = createClient()
   const { toast } = useToast()
 
@@ -415,26 +413,11 @@ export default function MenuManagementPage() {
   const availableTags = ["veg", "non-veg", "spicy", "healthy", "gluten-free"]
 
   useEffect(() => {
-    checkAuth()
     fetchMenuItems()
     checkStorageBucket()
   }, [])
 
-  const checkAuth = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      router.push("/admin/login")
-      return
-    }
 
-    const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
-
-    if (!userData || !["admin", "staff"].includes(userData.role)) {
-      router.push("/admin/dashboard")
-    }
-  }
 
   const checkStorageBucket = async () => {
     const result = await checkBucketExists()

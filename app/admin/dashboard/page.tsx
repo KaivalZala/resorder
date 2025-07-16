@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,22 +12,25 @@ import { createClient } from "@/utils/supabase/client"
 import type { Order } from "@/lib/types"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { useToast } from "@/hooks/use-toast"
+// Theme imports removed
+import { useRouter } from "next/navigation"
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [currentDateTime, setCurrentDateTime] = useState(new Date())
 
   const [previewOrder, setPreviewOrder] = useState<Order | null>(null)
   const [clearingCompleted, setClearingCompleted] = useState(false)
   const [clearingCancelled, setClearingCancelled] = useState(false)
   const [activeTab, setActiveTab] = useState("pending")
-  const router = useRouter()
   const supabase = createClient()
   const { toast } = useToast()
+  // Theme variables removed
+  const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
     fetchOrders()
 
     // Set up real-time subscription with better error handling
@@ -64,22 +66,17 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
-  const checkAuth = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      router.push("/admin/login")
-      return
-    }
+  // Update date and time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date())
+    }, 60000) // Update every minute
+    
+    return () => clearInterval(timer)
+  }, [])
 
-    const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
 
-    if (!userData || !["admin", "staff", "kitchen"].includes(userData.role)) {
-      await supabase.auth.signOut()
-      router.push("/admin/login")
-    }
-  }
+
 
   const fetchOrders = async () => {
     try {
@@ -942,18 +939,72 @@ export default function AdminDashboardPage() {
       <div className="max-w-6xl mx-auto p-2 sm:p-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
             <p className="text-gray-600 text-sm sm:text-base">Manage orders and restaurant operations</p>
           </div>
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <Button variant="outline" onClick={() => router.push('/admin/analytics')} className="w-full sm:w-auto">Analytics</Button>
-            <Button variant="outline" onClick={() => router.push('/admin/tables')} className="w-full sm:w-auto">Table Management</Button>
-            <Button variant="outline" onClick={() => router.push('/admin/menu')} className="w-full sm:w-auto">Menu Management</Button>
-            <Button variant="outline" onClick={() => router.push('/admin/settings')} className="w-full sm:w-auto">Settings</Button>
-            <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
-              <LogOut className="h-4 w-4 mr-2" />Logout
-            </Button>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-between items-center">
+            <div className="text-sm text-gray-600 mr-4">
+              {currentDateTime.toLocaleDateString()} {currentDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </div>
+            <div className="flex gap-2">
+              {/* Theme toggle removed as it's already in admin layout */}
+              <Button variant="outline" onClick={() => router.push('/admin/settings')} className="w-full sm:w-auto">Settings</Button>
+              <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
+                <LogOut className="h-4 w-4 mr-2" />Logout
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* Order Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Pending Orders Card */}
+          <Card className="border-l-4 border-yellow-500">
+            <CardContent className="flex items-center p-6">
+              <div className="bg-yellow-100 p-3 rounded-full mr-4">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-xl font-bold text-yellow-700">Pending Orders</CardTitle>
+                <div className="mt-1 flex items-center">
+                  <span className="text-3xl font-bold">{filterOrdersByStatus("pending").length}</span>
+                  <Badge className="ml-2 bg-yellow-200 text-yellow-800">Needs Attention</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* In Progress Orders Card */}
+          <Card className="border-l-4 border-blue-500">
+            <CardContent className="flex items-center p-6">
+              <div className="bg-blue-100 p-3 rounded-full mr-4">
+                <Clock className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-xl font-bold text-blue-700">In Progress</CardTitle>
+                <div className="mt-1 flex items-center">
+                  <span className="text-3xl font-bold">{filterOrdersByStatus("in_progress").length}</span>
+                  <Badge className="ml-2 bg-blue-200 text-blue-800">Being Prepared</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Completed Orders Card */}
+          <Card className="border-l-4 border-green-500">
+            <CardContent className="flex items-center p-6">
+              <div className="bg-green-100 p-3 rounded-full mr-4">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-xl font-bold text-green-700">Completed</CardTitle>
+                <div className="mt-1 flex items-center">
+                  <span className="text-3xl font-bold">{filterOrdersByStatus("completed").length}</span>
+                  <Badge className="ml-2 bg-green-200 text-green-800">Delivered</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="pending" className="space-y-4">
@@ -1007,7 +1058,10 @@ export default function AdminDashboardPage() {
                   </CardContent>
                 </Card>
               ) : (
-                filterOrdersByStatus("in_progress").map((order) => <OrderCard key={order.id} order={order} />)
+                filterOrdersByStatus("in_progress")
+                  .slice()
+                  .sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime())
+                  .map((order) => <OrderCard key={order.id} order={order} />)
               )}
             </div>
           </TabsContent>

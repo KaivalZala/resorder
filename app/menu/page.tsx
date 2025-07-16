@@ -127,10 +127,10 @@ export default function MenuPage() {
       },
     })
 
-    toast({
-      title: "Added to cart! 🎉",
-      description: `${quantity}x ${selectedItem.name} added to Table #${state.tableNumber} cart`,
-    })
+    // toast({
+    //   title: "Added to cart! 🎉",
+    //   description: `${quantity}x ${selectedItem.name} added to Table #${state.tableNumber} cart`,
+    // })
 
     // Close the dialog and reset form
     setDialogOpen(false)
