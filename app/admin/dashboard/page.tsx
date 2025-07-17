@@ -599,13 +599,13 @@ export default function AdminDashboardPage() {
   }
 
   const OrderCard = ({ order }: { order: Order }) => (
-    <Card className="mb-4">
+    <Card className="mb-4 w-full">
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <CardTitle className="text-base sm:text-lg">Table #{order.table_number}</CardTitle>
-            <p className="text-xs sm:text-sm text-gray-600">{new Date(order.created_at).toLocaleString()}</p>
-            <p className="text-xs sm:text-sm text-gray-600">Order ID: {order.id.slice(0, 8)}</p>
+            <CardTitle className="text-base sm:text-lg md:text-xl">Table #{order.table_number}</CardTitle>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600">{new Date(order.created_at).toLocaleString()}</p>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600">Order ID: {order.id.slice(0, 8)}</p>
           </div>
           <div className="text-right mt-2 sm:mt-0">
             <Badge className={getStatusColor(order.status)}>{order.status.replace("_", " ").toUpperCase()}</Badge>
@@ -632,7 +632,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2">
           {order.status === "pending" && (
             <>
               <Button size="sm" onClick={() => updateOrderStatus(order.id, "in_progress")} className="w-full sm:w-auto">
@@ -936,38 +936,36 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-2 sm:p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-600 text-sm sm:text-base">Manage orders and restaurant operations</p>
-          </div>
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-between items-center">
-            <div className="text-sm text-gray-600 mr-4">
-              {currentDateTime.toLocaleDateString()} {currentDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-            </div>
-            <div className="flex gap-2">
-              {/* Theme toggle removed as it's already in admin layout */}
-              <Button variant="outline" onClick={() => router.push('/admin/settings')} className="w-full sm:w-auto">Settings</Button>
-              <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
-                <LogOut className="h-4 w-4 mr-2" />Logout
-              </Button>
-            </div>
-          </div>
+      <div className="container mx-auto py-4 px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
+        {/* Heading block for mobile and desktop */}
+        <div className="pt-14 sm:pt-0 mt-2 mb-4 sm:mt-0 sm:mb-6 w-full">
+          <h1 className="text-2xl sm:text-3xl font-bold text-left">Dashboard</h1>
+          <p className="text-gray-600 text-sm sm:text-base mt-1">Manage orders and restaurant operations</p>
         </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  <div className="text-sm text-gray-600 mb-2 sm:mb-0 mr-0 sm:mr-4 w-full sm:w-auto">
+    {currentDateTime.toLocaleDateString()} {currentDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+  </div>
+  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <Button variant="outline" onClick={() => router.push('/admin/settings')} className="w-full max-w-full sm:w-auto">Settings</Button>
+    <Button variant="outline" onClick={handleLogout} className="w-full max-w-full sm:w-auto">
+      <LogOut className="h-4 w-4 mr-2" />Logout
+    </Button>
+  </div>
+</div>
 
         {/* Order Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           {/* Pending Orders Card */}
-          <Card className="border-l-4 border-yellow-500">
-            <CardContent className="flex items-center p-6">
+          <Card className="border-l-4 border-yellow-500 w-full">
+            <CardContent className="flex items-center p-4 sm:p-6">
               <div className="bg-yellow-100 p-3 rounded-full mr-4">
                 <Clock className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="flex-1">
-                <CardTitle className="text-xl font-bold text-yellow-700">Pending Orders</CardTitle>
+                <CardTitle className="text-base sm:text-xl font-bold text-yellow-700">Pending Orders</CardTitle>
                 <div className="mt-1 flex items-center">
-                  <span className="text-3xl font-bold">{filterOrdersByStatus("pending").length}</span>
+                  <span className="text-2xl sm:text-3xl font-bold">{filterOrdersByStatus("pending").length}</span>
                   <Badge className="ml-2 bg-yellow-200 text-yellow-800">Needs Attention</Badge>
                 </div>
               </div>
@@ -975,15 +973,15 @@ export default function AdminDashboardPage() {
           </Card>
 
           {/* In Progress Orders Card */}
-          <Card className="border-l-4 border-blue-500">
-            <CardContent className="flex items-center p-6">
+          <Card className="border-l-4 border-blue-500 w-full">
+            <CardContent className="flex items-center p-4 sm:p-6">
               <div className="bg-blue-100 p-3 rounded-full mr-4">
                 <Clock className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <CardTitle className="text-xl font-bold text-blue-700">In Progress</CardTitle>
+                <CardTitle className="text-base sm:text-xl font-bold text-blue-700">In Progress</CardTitle>
                 <div className="mt-1 flex items-center">
-                  <span className="text-3xl font-bold">{filterOrdersByStatus("in_progress").length}</span>
+                  <span className="text-2xl sm:text-3xl font-bold">{filterOrdersByStatus("in_progress").length}</span>
                   <Badge className="ml-2 bg-blue-200 text-blue-800">Being Prepared</Badge>
                 </div>
               </div>
@@ -991,16 +989,16 @@ export default function AdminDashboardPage() {
           </Card>
 
           {/* Completed Orders Card */}
-          <Card className="border-l-4 border-green-500">
-            <CardContent className="flex items-center p-6">
+          <Card className="border-l-4 border-green-500 w-full">
+            <CardContent className="flex items-center p-4 sm:p-6">
               <div className="bg-green-100 p-3 rounded-full mr-4">
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <div className="flex-1">
-                <CardTitle className="text-xl font-bold text-green-700">Completed</CardTitle>
+                <CardTitle className="text-base sm:text-xl font-bold text-green-700">Completed</CardTitle>
                 <div className="mt-1 flex items-center">
-                  <span className="text-3xl font-bold">{filterOrdersByStatus("completed").length}</span>
-                  <Badge className="ml-2 bg-green-200 text-green-800">Delivered</Badge>
+                  <span className="text-2xl sm:text-3xl font-bold">{filterOrdersByStatus("completed").length}</span>
+                  <Badge className="ml-1 sm:ml-2 bg-green-200 text-green-800">Delivered</Badge>
                 </div>
               </div>
             </CardContent>
@@ -1008,42 +1006,44 @@ export default function AdminDashboardPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="pending" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-            <TabsTrigger value="pending" className="relative">
+          <TabsList className="grid grid-cols-2 gap-2 sm:grid sm:grid-cols-4 bg-white rounded-lg p-1 shadow-sm mb-2">
+            <TabsTrigger value="pending" className="relative w-full">
               Pending
               {filterOrdersByStatus("pending").length > 0 && (
-                <Badge className="ml-2 bg-red-500 text-white">{filterOrdersByStatus("pending").length}</Badge>
+                <Badge className="ml-1 sm:ml-2 bg-red-500 text-white">{filterOrdersByStatus("pending").length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="in_progress">
+            <TabsTrigger value="in_progress" className="w-full">
               In Progress
               {filterOrdersByStatus("in_progress").length > 0 && (
-                <Badge className="ml-2 bg-blue-500 text-white">{filterOrdersByStatus("in_progress").length}</Badge>
+                <Badge className="ml-1 sm:ml-2 bg-blue-500 text-white">{filterOrdersByStatus("in_progress").length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-            <TabsTrigger value="cancelled" className="relative">
+            <TabsTrigger value="completed" className="w-full">Completed</TabsTrigger>
+            <TabsTrigger value="cancelled" className="relative w-full">
               Cancelled
               {filterOrdersByStatus("cancelled").length > 0 && (
-                <Badge className="ml-2 bg-red-500 text-white">{filterOrdersByStatus("cancelled").length}</Badge>
+                <Badge className="ml-1 sm:ml-2 bg-red-500 text-white">{filterOrdersByStatus("cancelled").length}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4 sm:mt-0">
               {filterOrdersByStatus("pending").length === 0 ? (
                 <Card>
-                  <CardContent className="text-center py-8">
-                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <CardContent className="text-center py-6 sm:py-8">
+                    <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No pending orders</p>
                   </CardContent>
                 </Card>
               ) : (
-                filterOrdersByStatus("pending")
-                  .slice()
-                  .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-                  .map((order) => <OrderCard key={order.id} order={order} />)
+                <div className="space-y-4">
+                  {filterOrdersByStatus("pending")
+                    .slice()
+                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                    .map((order) => <OrderCard key={order.id} order={order} />)}
+                </div>
               )}
             </div>
           </TabsContent>
@@ -1052,8 +1052,8 @@ export default function AdminDashboardPage() {
             <div className="space-y-4">
               {filterOrdersByStatus("in_progress").length === 0 ? (
                 <Card>
-                  <CardContent className="text-center py-8">
-                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <CardContent className="text-center py-6 sm:py-8">
+                    <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No orders in progress</p>
                   </CardContent>
                 </Card>
@@ -1069,13 +1069,13 @@ export default function AdminDashboardPage() {
           <TabsContent value="completed">
             <div className="space-y-4">
               {filterOrdersByStatus("completed").length > 0 && (
-                <div className="flex justify-end">
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={clearCompletedOrders}
                     disabled={clearingCompleted}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                   >
                     {clearingCompleted ? (
                       <>
@@ -1094,8 +1094,8 @@ export default function AdminDashboardPage() {
 
               {filterOrdersByStatus("completed").length === 0 ? (
                 <Card>
-                  <CardContent className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <CardContent className="text-center py-6 sm:py-8">
+                    <CheckCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No completed orders</p>
                   </CardContent>
                 </Card>
@@ -1108,7 +1108,7 @@ export default function AdminDashboardPage() {
           <TabsContent value="cancelled">
             <div className="space-y-4">
               {filterOrdersByStatus("cancelled").length > 0 && (
-                <div className="flex justify-end">
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
                   <Button
                     variant="destructive"
                     size="sm"
@@ -1133,8 +1133,8 @@ export default function AdminDashboardPage() {
 
               {filterOrdersByStatus("cancelled").length === 0 ? (
                 <Card>
-                  <CardContent className="text-center py-8">
-                    <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <CardContent className="text-center py-6 sm:py-8">
+                    <XCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No cancelled orders</p>
                   </CardContent>
                 </Card>

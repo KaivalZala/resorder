@@ -399,7 +399,7 @@ export default function OrderStatusPage({ params }: { params: { orderId: string 
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/table-selection")}
+            onClick={() => router.push("/menu")}
             className="hover:bg-white/50 backdrop-blur-sm rounded-full"
           >
             <ArrowLeft className="h-5 w-5" />

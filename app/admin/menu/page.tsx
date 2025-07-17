@@ -180,21 +180,23 @@ const FormContent = ({
 
     <div>
       <Label htmlFor="category">Category *</Label>
-      <Select
-        value={formData.category || ""}
-        onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent>
-          {categories.map((category) => (
-            <SelectItem key={category} value={category}>
-              {category}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex flex-col items-center w-full xs:items-start xs:flex-row xs:justify-start">
+        <Select
+          value={formData.category || ""}
+          onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
+        >
+          <SelectTrigger className="block w-full max-w-xs mx-auto pl-10 xs:pl-0 xs:w-auto xs:mx-0">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
 
     <div>

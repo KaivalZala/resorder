@@ -396,15 +396,22 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!state.tableNumber) {
-      router.push("/table-selection")
-      return
+      const storedTableNumber = localStorage.getItem("tableNumber");
+      if (storedTableNumber) {
+        dispatch({ type: "SET_TABLE", payload: Number(storedTableNumber) });
+        // Let the effect re-run with updated state
+        return;
+      } else {
+        router.push("/table-selection");
+        return;
+      }
     }
     if (state.items.length === 0) {
-      router.push("/menu")
-      return
+      router.push("/menu");
+      return;
     }
-    fetchBillingSettings()
-  }, [state.tableNumber, state.items.length, router])
+    fetchBillingSettings();
+  }, [state.tableNumber, state.items.length, router, dispatch]);
 
   const fetchBillingSettings = async () => {
     try {
@@ -568,46 +575,56 @@ export default function CartPage() {
                 {state.items.map((item, index) => (
                   <div
                     key={item.item_id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up"
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex-1">
-                      <h3 className="font-bold text-base sm:text-lg text-gray-800">{item.name}</h3>
-                      <p className="text-gray-600 text-sm">₹{item.price.toFixed(2)} each</p>
-                      {item.note && (
-                        <p className="text-sm text-blue-600 italic bg-blue-50 px-2 py-1 rounded mt-1">
-                          Note: {item.note}
-                        </p>
-                      )}
+                    {/* Item Info */}
+                    <div className="flex-1 w-full min-w-0">
+                      <div className="flex flex-col gap-1">
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 truncate">{item.name}</h3>
+                        <span className="text-xs sm:text-sm text-gray-500">₹{item.price.toFixed(2)} each</span>
+                        {item.note && (
+                          <span className="text-xs text-blue-600 italic bg-blue-50 px-2 py-1 rounded mt-1 max-w-full truncate block">
+                            Note: {item.note}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-start gap-3 bg-gray-50 rounded-full p-1 w-full sm:w-auto">
+                    {/* Quantity Controls */}
+                    <div className="flex items-center justify-center gap-2 bg-gray-50 rounded-full px-2 py-1 w-fit mx-auto">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => updateQuantity(item.item_id, item.quantity - 1)}
                         className="rounded-full hover:bg-white"
+                        aria-label="Decrease quantity"
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <span className="w-8 text-center font-bold text-lg">{item.quantity}</span>
+                      <span className="w-7 text-center font-bold text-base sm:text-lg select-none">{item.quantity}</span>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => updateQuantity(item.item_id, item.quantity + 1)}
                         className="rounded-full hover:bg-white"
+                        aria-label="Increase quantity"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className="text-right sm:min-w-[80px]">
-                      <p className="font-bold text-lg text-green-600">₹{(item.price * item.quantity).toFixed(2)}</p>
+                    {/* Price & Remove */}
+                    <div className="flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-2 min-w-[96px] sm:min-w-[120px]">
+                      <span className="font-bold text-base sm:text-lg text-green-600 whitespace-nowrap">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </span>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => removeItem(item.item_id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                        aria-label="Remove item"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

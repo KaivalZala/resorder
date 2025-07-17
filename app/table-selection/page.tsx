@@ -40,6 +40,7 @@ export default function TableSelectionPage() {
   const handleTableSelect = (tableNumber: number) => {
     setSelectedTable(tableNumber)
     dispatch({ type: "SET_TABLE", payload: tableNumber })
+    localStorage.setItem('tableNumber', tableNumber.toString())
     setTimeout(() => {
       router.push("/menu")
     }, 300)

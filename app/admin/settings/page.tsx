@@ -379,31 +379,19 @@ export default function SettingsPage() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3 w-full">
               {billingFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className={`flex items-center gap-4 p-4 border rounded-lg ${
+                  className={`flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-4 p-4 border rounded-lg w-full ${
                     !field.is_active ? "opacity-60 bg-gray-50" : "bg-white"
                   }`}
                 >
-                  <div className="flex flex-col gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => moveField(field.id, "up")} disabled={index === 0}>
-                      ↑
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => moveField(field.id, "down")}
-                      disabled={index === billingFields.length - 1}
-                    >
-                      ↓
-                    </Button>
-                  </div>
+                  
 
                   <GripVertical className="h-5 w-5 text-gray-400" />
 
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold">{field.field_label}</h3>
                       <Badge className={getFieldTypeColor(field.field_type)}>{field.field_type}</Badge>
@@ -417,7 +405,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-row flex-wrap items-center gap-2 mt-2 xs:mt-0">
                     <Switch checked={field.is_active} onCheckedChange={() => toggleFieldStatus(field)} />
 
                     <Dialog>
