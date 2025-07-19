@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ShoppingCart, Plus, Minus, Leaf, Flame, Heart, Star, Clock, ChefHat, ArrowLeft } from "lucide-react"
+import { ShoppingCart, Plus, Minus, Leaf, Flame, Heart, Star, Clock, ChefHat, ArrowLeft, AlertCircle } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { createClient } from "@/utils/supabase/client"
 import type { MenuItem } from "@/lib/types"
@@ -17,6 +17,40 @@ import { useToast } from "@/hooks/use-toast"
 import type { Order } from "@/lib/types"
 
 export default function MenuPage() {
+  const [waiterCallPending, setWaiterCallPending] = useState(false)
+  const [waiterCallError, setWaiterCallError] = useState("")
+
+  const handleCallWaiter = async () => {
+    setWaiterCallError("")
+    setWaiterCallPending(true)
+    try {
+      // Check for existing pending call
+      const { data: existing, error: checkError } = await supabase
+        .from("waiter_calls")
+        .select("id")
+        .eq("table_number", state.tableNumber)
+        .eq("status", "pending")
+        .maybeSingle()
+      if (checkError) throw checkError
+      if (existing) {
+        setWaiterCallError("Waiter already called for this table. Please wait.")
+        setWaiterCallPending(false)
+        return
+      }
+      // Insert new call
+      const { error } = await supabase.from("waiter_calls").insert({
+        table_number: state.tableNumber,
+        status: "pending"
+      })
+      if (error) throw error
+      toast({ title: "Waiter Called!", description: `A waiter will attend Table #${state.tableNumber} shortly.` })
+    } catch (err) {
+      setWaiterCallError("Failed to call waiter. Please try again.")
+    } finally {
+      setWaiterCallPending(false)
+    }
+  }
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
@@ -226,7 +260,20 @@ export default function MenuPage() {
                 <Clock className="h-5 w-5 text-[#fffffe]" />
                 <span className="font-semibold text-[#fffffe]">15-25 min</span>
               </div>
+              <Button
+                onClick={handleCallWaiter}
+                disabled={waiterCallPending}
+                className="bg-gradient-to-r from-orange-400 to-red-400 text-white font-bold px-6 py-2 rounded-full shadow-md hover:scale-105 transition-all duration-300"
+              >
+                {waiterCallPending ? "Calling..." : "Call Waiter"}
+              </Button>
             </div>
+            {waiterCallError && (
+              <div className="flex items-center justify-center mt-2">
+                <AlertCircle className="text-red-500 mr-2" />
+                <span className="text-red-600 font-semibold">{waiterCallError}</span>
+              </div>
+            )}
           </div>
         </div>
         {/* Subtle arch pattern at bottom */}

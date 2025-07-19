@@ -16,6 +16,7 @@ import {
   LogOut,
 } from "lucide-react"
 // useTheme import removed
+import { PhoneCall } from "lucide-react"
 
 export default function AdminLayout({
   children,
@@ -127,6 +128,15 @@ export default function AdminLayout({
               >
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
+              </Button>
+            </Link>
+            <Link href="/admin/calling">
+              <Button
+                variant={pathname === "/admin/calling" ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <PhoneCall className="mr-2 h-4 w-4" />
+                Calling
               </Button>
             </Link>
           </nav>
